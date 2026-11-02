@@ -20,7 +20,7 @@ public class DebugModeTest {
     @Test public void loggingIsOffByDefaultAndOnlyRecordsWhileEnabled() throws Exception {
         assertFalse(DebugLog.enabled(context));DebugLog.event(context,"must_not_exist",DebugLog.data("title","Private book"));assertFalse(log.exists());
         DebugLog.setEnabled(context,true);DebugLog.event(context,"test_event",DebugLog.data("value","A book"));assertTrue(log.exists());
-        String enabled=Files.readString(log.toPath());assertTrue(enabled.contains("debug_mode_enabled"));assertTrue(enabled.contains("test_event"));
+        String enabled=new String(Files.readAllBytes(log.toPath()),java.nio.charset.StandardCharsets.UTF_8);assertTrue(enabled.contains("debug_mode_enabled"));assertTrue(enabled.contains("test_event"));
         DebugLog.setEnabled(context,false);long length=log.length();DebugLog.event(context,"must_not_exist",DebugLog.data());assertEquals(length,log.length());assertFalse(DebugLog.enabled(context));
         ByteArrayOutputStream export=new ByteArrayOutputStream();DebugLog.export(context,export);assertTrue(export.toString("UTF-8").contains("test_event"));
         DebugLog.clear(context);assertFalse(log.exists());

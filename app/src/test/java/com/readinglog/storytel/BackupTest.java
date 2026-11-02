@@ -43,4 +43,8 @@ public class BackupTest {
         try {read(text.getBytes(StandardCharsets.UTF_8));fail("Dangling comment accepted");}catch(IOException expected){}
         CsvBackup.restore(db,read(empty));assertTrue(db.books("",0,0).isEmpty());assertTrue(db.series().isEmpty());
     }
+    @Test public void seriesUniquenessMatchesSQLiteForUnicodeNames() throws Exception {
+        db.seriesId("Élan");db.seriesId("élan");byte[] original=dump();
+        CsvBackup.Snapshot snapshot=read(original);assertEquals(2,snapshot.seriesCount());CsvBackup.restore(db,snapshot);assertArrayEquals(original,dump());
+    }
 }

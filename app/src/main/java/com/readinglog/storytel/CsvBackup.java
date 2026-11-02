@@ -55,7 +55,7 @@ final class CsvBackup {
             switch(row.get(0)) {
                 case "series":
                     only(row,0,1,5);
-                    if(!seriesIds.add(id) || row.get(5).trim().isEmpty() || !names.add(row.get(5).toLowerCase(Locale.ROOT)))throw new IOException("Duplicate or empty series in backup.");
+                    if(!seriesIds.add(id) || row.get(5).trim().isEmpty() || !names.add(sqliteCase(row.get(5))))throw new IOException("Duplicate or empty series in backup.");
                     seriesNames.put(id,row.get(5));snapshot.series.add(row);break;
                 case "book":
                     only(row,0,1,2,3,4,5,6,7,8);
@@ -80,6 +80,12 @@ final class CsvBackup {
     }
     private static long id(String value) throws IOException {
         try {long n=Long.parseLong(value);if(n<=0||n==Long.MAX_VALUE||!Long.toString(n).equals(value))throw new NumberFormatException();return n;}catch(NumberFormatException e){throw new IOException("Backup contains an invalid record ID.");}
+    }
+    private static String sqliteCase(String value) {
+        // SQLite's built-in NOCASE folds ASCII only; match its uniqueness rule exactly.
+        StringBuilder folded=new StringBuilder(value.length());
+        for(int i=0;i<value.length();i++) {char c=value.charAt(i);folded.append(c>='A'&&c<='Z'?(char)(c+32):c);}
+        return folded.toString();
     }
     private static void only(List<String> row,int... fields) throws IOException {
         boolean[] allowed=new boolean[11];for(int field:fields)allowed[field]=true;
