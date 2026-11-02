@@ -1,0 +1,66 @@
+name: Publish verified Android release
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Successful Android workflow run containing the APK
+        required: true
+      tag:
+        description: Release version tag
+        required: true
+        default: v0.2.0
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: read
+      contents: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      BUILD_RUN_ID: ${{ inputs.run_id }}
+      RELEASE_TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify source build
+        shell: bash
+        run: |
+          [[ "$BUILD_RUN_ID" =~ ^[0-9]+$ ]]
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN_ID" > "$RUNNER_TEMP/build-run.json"
+          python3 - <<'PY'
+          import json, os
+          with open(os.environ['RUNNER_TEMP']+'/build-run.json') as f:
+              run=json.load(f)
+          assert run['conclusion']=='success', 'Build must have succeeded'
+          assert run['head_branch']=='main' and run['event']=='push', 'Use a main-branch push build'
+          assert run['head_repository']['full_name']==os.environ['GITHUB_REPOSITORY'], 'Wrong source repository'
+          assert run['path']=='.github/workflows/android.yml', 'Use the Android validation workflow'
+          PY
+      - uses: actions/download-artifact@v4
+        with:
+          name: reading-log-android
+          path: release
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ inputs.run_id }}
+      - name: Package APK and checksums
+        run: |
+          mv release/app-release.apk release/storytel-reading-log.apk
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, zipfile
+          root=Path('release')
+          with zipfile.ZipFile(root/'storytel-reading-log.zip','w',zipfile.ZIP_DEFLATED) as z:
+              z.write(root/'storytel-reading-log.apk','storytel-reading-log.apk')
+          names=['storytel-reading-log.apk','storytel-reading-log.zip']
+          (root/'SHA256SUMS.txt').write_text(''.join(hashlib.sha256((root/n).read_bytes()).hexdigest()+'  '+n+'\n' for n in names))
+          PY
+      - name: Publish downloads
+        run: |
+          if ! gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft --target "$GITHUB_SHA" --title "$RELEASE_TAG" --notes "See the README for installation, setup and backup instructions."
+          fi
+          gh release upload "$RELEASE_TAG" release/storytel-reading-log.apk release/storytel-reading-log.zip release/SHA256SUMS.txt --repo "$GITHUB_REPOSITORY" --clobber
+          gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --draft=false --latest
