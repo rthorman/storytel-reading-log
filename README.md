@@ -36,7 +36,7 @@ Ivory paper, bottle-green accents, antique-brass details and serif typography gi
 | --- | --- | --- |
 | ![Library](docs/screenshots/library.png) | ![Book details](docs/screenshots/book-details.png) | ![Settings](docs/screenshots/settings.png) |
 
-Screenshots use demonstration books; no personal reading history is included.
+Screenshots are rendered from the Android UI in automated tests using demonstration books; no personal reading history is included.
 
 ## What it does
 
