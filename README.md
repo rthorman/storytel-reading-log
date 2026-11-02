@@ -16,7 +16,7 @@ An unofficial Android companion that turns Storytel playback notifications into 
 
 ## Install and start logging on your Android phone
 
-**Play Protect installation block:** Some devices block this browser-downloaded APK because automatic capture requires notification-listener access. If you see **“App blocked to protect your device”**, read the [Play Protect review and distribution notes](docs/PLAY_PROTECT.md). This is separate from the restricted-settings step below. There is no in-app switch that clears Google's installation decision; a Google review has not yet been obtained.
+**Seeing “App blocked to protect your device”?** Some devices block this download because automatic logging needs notification access. Read [why Play Protect may block installation](#why-play-protect-may-block-installation) below before continuing. A Google review has not yet been obtained.
 
 1. **Download the APK above on your phone.** If you choose the ZIP, extract it in Files first.
 2. **Tap the APK to install.** If prompted, open Settings and allow your browser or Files app to **install unknown apps**, then return to install. You can disable that installation permission afterward.
@@ -25,6 +25,20 @@ An unofficial Android companion that turns Storytel playback notifications into 
 5. **Play an audiobook in Storytel.** Check that its playback notification appears, then return to the journal’s **Library**. The book and its first detected listening date should appear. Review the title and author.
 
 **Requires Android 8.0 or newer. This is an early, sideloaded prototype.** Series, ebook activity and finish dates currently need manual entry. Before changing phones or uninstalling, use **Settings → Export reading data** to save a CSV backup. Read the [installation and troubleshooting guide](docs/INSTALL.md) if Android rejects an update.
+
+### Why Play Protect may block installation
+
+Google Play Protect can display **“App blocked to protect your device”** when an app downloaded through a browser, messaging app or file manager requests certain sensitive capabilities. **Notification-listener access is one of those capabilities.** Google documents this protection for certain markets because notification access can be abused to read private messages or verification codes and commit fraud. The warning reported for this prototype is consistent with that protection; its title alone is not a complete diagnosis of Google's device-specific decision. [Google's explanation](https://developers.google.com/android/play-protect/warning-dev-guidance).
+
+**Why this journal needs that access:** automatic logging reads Storytel's playback notification to discover the book being listened to and record its first detected listening date. Android grants notification access at the app level, rather than offering a “Storytel only” permission. Our listener checks the originating package and ignores other apps before reading notification content, but that filtering is implemented by our code. Play Protect can still block installation based on the broader capability declared in the APK.
+
+**What the app does with the data:** it processes the two supported Storytel packages, keeps books and comments in local storage, and declares no Internet permission. There is no server or analytics SDK. Debug logging is **off by default**; diagnostic exports and CSV backups happen only when you choose to save a file. These design choices limit data use, but do not constitute Google approval or automatically clear an installation block.
+
+**Why turning off Debug mode does not resolve this:** Debug mode controls diagnostic recording inside the installed journal. The notification listener is a separate capability needed for normal automatic capture and is declared in the app package. The APK is a non-debuggable release build, although this early version still uses prototype signing. Neither the runtime Debug mode switch nor a different signing certificate removes that notification-access requirement.
+
+**Two different Android prompts:** “Allow from this source” permits your browser or Files app to install APKs. “Allow restricted settings” can permit sensitive access **after the app is installed**. Neither is the same as a Play Protect installation verdict, and the restricted-settings step in the instructions above does not clear a Play Protect block.
+
+Google's review/appeal process or distribution through Google Play review/testing is the supported route for addressing the classification; approval is not guaranteed. The public source code and AGPL license make the implementation inspectable, but do not make it Google-verified. See the [review details and current status](docs/PLAY_PROTECT.md) for the exact APK, checksums and permission explanation. No completed Google review is claimed.
 
 ## A quieter place for your reading life
 
