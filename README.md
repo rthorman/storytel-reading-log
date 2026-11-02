@@ -19,7 +19,13 @@ Repeated notifications for the same title and author do not create duplicate boo
 
 Series membership, ebook reading, whole-book completion and re-reading sessions cannot be reliably derived from playback notifications in this version. Enter those details manually. Notification removal, playback pauses and chapter endings never mark a book finished. No Storytel API or account credentials are used. Device testing with the installed Storytel version is required to verify its metadata format and package ID. Battery restrictions or revoked notification access can interrupt capture.
 
-## Build
+## Diagnostic export
+
+Use **Export debug log** on the home screen to save a JSON Lines file through Android's document picker. It includes Storytel notification extras (text/scalars and type names for complex objects), media title/author/artist/album, playback state and position, capture/skip decisions, database record IDs, lifecycle events and error stack traces. Each record has a UTC timestamp. Only the two recognized Storytel packages are logged. Tokens, images and intents are not serialized. Two private rotating files retain approximately 2 MiB in total; old events are discarded. **Set up automatic listening log → Clear debug log** deletes this diagnostic history without deleting books.
+
+The export contains personal reading metadata. Review it before sharing. To investigate a problem, clear the log, reproduce it in Storytel, then export it and include what you expected, the approximate time and your Storytel version. A debug log is not a backup of the reading database.
+
+## Build instructions
 
 Open this directory in Android Studio with JDK 17 and install Android SDK 35. Use an installed Gradle 8.9 to build, or generate the wrapper with `gradle wrapper --gradle-version 8.9` first. This initial source does not include a downloaded wrapper binary.
 
