@@ -102,7 +102,7 @@ public final class MainActivity extends Activity {
         if(tab==2) renderSettings(); else renderLibrary();
         LinearLayout nav=ui.row(); nav.setPadding(dp(10),dp(6),dp(10),dp(6)); nav.setBackgroundColor(Ui.SURFACE);
         String[] names={"Library","Series","Settings"};
-        for(int i=0;i<names.length;i++) { final int destination=i; Button b=ui.textButton(names[i],()-> { hideKeyboard(); if(listScroll!=null&&tab==0) libraryScroll=listScroll.getScrollY(); tab=destination; showMain(); }); b.setTextColor(tab==i?Ui.INK:Ui.MUTED); if(tab==i) b.setBackground(ui.shape(Ui.TINT,0,9)); b.setSelected(tab==i); nav.addView(b,new LinearLayout.LayoutParams(0,-2,1)); }
+        for(int i=0;i<names.length;i++) { final int destination=i; Button b=ui.textButton(names[i],()-> { hideKeyboard(); if(listScroll!=null&&tab==0) libraryScroll=listScroll.getScrollY(); tab=destination; showMain(); }); b.setPadding(dp(4),dp(12),dp(4),dp(12)); b.setSingleLine(true); b.setEllipsize(android.text.TextUtils.TruncateAt.END); b.setContentDescription(names[i]+(tab==i?", selected":"")); b.setTextColor(tab==i?Ui.INK:Ui.MUTED); if(tab==i) b.setBackground(ui.shape(Ui.TINT,0,9)); b.setSelected(tab==i); nav.addView(b,new LinearLayout.LayoutParams(0,-2,1)); }
         root.addView(ui.rule()); root.addView(nav);
     }
     private void renderLibrary() {
