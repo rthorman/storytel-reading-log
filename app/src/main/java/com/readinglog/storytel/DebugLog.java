@@ -11,7 +11,7 @@ import java.time.Instant;
 /** Two rotating private files, at most about 2 MiB total. Contains Storytel reading metadata. */
 final class DebugLog {
     static boolean enabled(Context context) {return context.getSharedPreferences("diagnostics",Context.MODE_PRIVATE).getBoolean("enabled",false);}
-    static void setEnabled(Context context,boolean enabled) {
+    static synchronized void setEnabled(Context context,boolean enabled) {
         if(enabled) {
             context.getSharedPreferences("diagnostics",Context.MODE_PRIVATE).edit().putBoolean("enabled",true).apply();
             event(context,"debug_mode_enabled",data());

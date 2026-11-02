@@ -20,5 +20,6 @@ public class CsvTest {
         for(String input:Arrays.asList("\"unfinished","a\"b,c","\"closed\"junk",String.join("",Collections.nCopies(65537,"x")))) {
             try {Csv.read(new StringReader(input));fail("Expected rejected CSV");}catch(IOException expected) {}
         }
+        try {Csv.write(new StringWriter(),Arrays.asList(String.join("",Collections.nCopies(65537,"x"))));fail("Oversized export accepted");}catch(IOException expected){}
     }
 }

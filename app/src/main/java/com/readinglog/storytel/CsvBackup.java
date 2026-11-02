@@ -22,9 +22,18 @@ final class CsvBackup {
     private static List<String> record(String... fields) { String[] row=new String[11];Arrays.fill(row,"");System.arraycopy(fields,0,row,0,fields.length);return Arrays.asList(row); }
     static void write(LogDatabase helper,OutputStream stream) throws IOException {
         // Android 8 provides java.time; avoid Java 9 collection factories on that API.
-        Writer out=new BufferedWriter(new OutputStreamWriter(stream,StandardCharsets.UTF_8));
+        OutputStream limited=new FilterOutputStream(stream) {
+            long bytes;
+            private void count(long n) throws IOException {bytes+=n;if(bytes>25L*1024*1024)throw new IOException("Backup exceeds 25 MiB.");}
+            @Override public void write(int value) throws IOException {count(1);out.write(value);}
+            @Override public void write(byte[] buffer,int off,int len) throws IOException {count(len);out.write(buffer,off,len);}
+        };
+        Writer out=new BufferedWriter(new OutputStreamWriter(limited,StandardCharsets.UTF_8));
         SQLiteDatabase db=helper.getReadableDatabase(); db.beginTransactionNonExclusive();
         try {
+            try(Cursor count=db.rawQuery("SELECT (SELECT COUNT(*) FROM books)+(SELECT COUNT(*) FROM series)+(SELECT COUNT(*) FROM comments)",null)) {
+                count.moveToFirst();if(count.getLong(0)>99998)throw new IOException("Backup exceeds 100,000 records.");
+            }
             Csv.write(out,HEADER); Csv.write(out,record("meta","1"));
             try(Cursor c=db.rawQuery("SELECT id,name FROM series ORDER BY id",null)) {while(c.moveToNext()) Csv.write(out,record("series",c.getString(0),"","","",c.getString(1)));}
             try(Cursor c=db.rawQuery("SELECT b.id,COALESCE(b.series_id,''),b.title,b.author,COALESCE(s.name,''),b.format,b.started,b.finished FROM books b LEFT JOIN series s ON b.series_id=s.id ORDER BY b.id",null)) {

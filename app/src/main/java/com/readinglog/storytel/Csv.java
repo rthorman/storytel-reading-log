@@ -34,7 +34,7 @@ final class Csv {
         return rows;
     }
     static void write(Writer out,List<String> row) throws IOException {
-        for(int i=0;i<row.size();i++) { if(i>0)out.write(',');out.write('"');out.write(row.get(i).replace("\"","\"\""));out.write('"'); }
+        for(int i=0;i<row.size();i++) { if(row.get(i).length()>65536)throw new IOException("A CSV field exceeds 64 KiB.");if(i>0)out.write(',');out.write('"');out.write(row.get(i).replace("\"","\"\""));out.write('"'); }
         out.write("\r\n");
     }
 }
