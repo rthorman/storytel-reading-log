@@ -14,6 +14,8 @@ To transfer between phones, use **Files → Share → Quick Share** with Bluetoo
 
 ## Set up automatic listening capture
 
+If the APK did not install and Play Protect displayed **“App blocked to protect your device”**, stop here and read [Play Protect review and distribution](PLAY_PROTECT.md). Google documents an installation block for internet-downloaded apps using sensitive access, including notification listeners. This app needs a notification listener for automatic capture. The “Allow restricted settings” step below concerns access **after installation**, and does not resolve that installation block.
+
 1. In the journal, open **Settings → Open notification access**.
 2. Select **Storytel reading log automation**, enable notification access and accept Android’s prompt. This permission technically allows notification access; this app checks only the supported Storytel package IDs.
 3. If blocked, open Android **Settings → Apps → Storytel Reading Log → ⋮ → Allow restricted settings**. Authenticate if requested and try notification access again. Wording and availability vary by device.
@@ -30,6 +32,7 @@ Review the title and author. Add series and comments yourself, and set a finish 
 
 ## Troubleshooting
 
+- **Play Protect blocks installation:** see the [review packet and supported distribution paths](PLAY_PROTECT.md). A Google review has not yet been obtained. Changing runtime Debug mode, renaming the APK or re-signing it does not remove the declared notification-listener access.
 - Check notification access, Storytel’s playback notification and the journal’s background battery permission.
 - Open the journal once after installation or a force-stop, then play a book again.
 - Reset Library search and filters if a captured book seems missing.

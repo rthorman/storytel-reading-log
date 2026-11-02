@@ -16,6 +16,8 @@ An unofficial Android companion that turns Storytel playback notifications into 
 
 ## Install and start logging on your Android phone
 
+**Play Protect installation block:** Some devices block this browser-downloaded APK because automatic capture requires notification-listener access. If you see **“App blocked to protect your device”**, read the [Play Protect review and distribution notes](docs/PLAY_PROTECT.md). This is separate from the restricted-settings step below. There is no in-app switch that clears Google's installation decision; a Google review has not yet been obtained.
+
 1. **Download the APK above on your phone.** If you choose the ZIP, extract it in Files first.
 2. **Tap the APK to install.** If prompted, open Settings and allow your browser or Files app to **install unknown apps**, then return to install. You can disable that installation permission afterward.
 3. **Open Storytel Reading Log → Settings → Open notification access.** Enable **Storytel reading log automation**. If Android blocks access, open Android **Settings → Apps → Storytel Reading Log → ⋮ → Allow restricted settings**, then try notification access again. Some phones omit this step.
