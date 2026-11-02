@@ -1,11 +1,15 @@
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 <resources>
     <style name="AppThemeBase" parent="android:style/Theme.Material.Light.NoActionBar">
         <item name="android:fontFamily">sans</item>
-        <item name="android:colorAccent">#AD4C32</item>
+        <item name="android:colorAccent">#183C31</item>
         <item name="android:windowLightStatusBar">true</item>
-        <item name="android:statusBarColor">#FAF7F1</item>
-        <item name="android:navigationBarColor">#FAF7F1</item>
+        <item name="android:statusBarColor">#F6F1E5</item>
+        <item name="android:navigationBarColor">#F6F1E5</item>
+        <item name="android:windowBackground">#F6F1E5</item>
+        <item name="android:colorControlHighlight">#22183C31</item>
         <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
     <style name="AppTheme" parent="AppThemeBase" />
 </resources>

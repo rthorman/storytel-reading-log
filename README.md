@@ -1,58 +1,90 @@
+<div align="center">
+
 # Storytel Reading Log
 
-Native Android app for a personal Storytel listening and reading history. Android 8+ (API 26), Java 17, Android Gradle Plugin 8.7.3, Gradle 8.9 and Android SDK 35.
+**A personal reading journal, with a little Victorian elegance.**
 
-## Features
+An unofficial Android companion that turns Storytel playback notifications into a listening history.
 
-- Automatic audiobook discovery and start-date logging using Android notification access.
-- Local SQLite storage; no server, analytics or Internet permission. Android backup disabled.
-- Book title, author, format, optional series, start and finish dates.
-- Separate timestamped comments on books and series.
-- Search by title, author or series; sort by title, author, series or start date; filter by reading status.
-- Manual correction, date pickers, deletion confirmation and series autocomplete.
+[![Android build](https://github.com/rthorman/storytel-reading-log/actions/workflows/android.yml/badge.svg)](https://github.com/rthorman/storytel-reading-log/actions/workflows/android.yml)
+[![Android 8+](https://img.shields.io/badge/Android-8%2B-183C31)](docs/INSTALL.md)
+[![AGPL v3](https://img.shields.io/badge/license-AGPLv3-987341)](LICENSE)
 
-## Automatic capture
+**[Download APK](https://github.com/rthorman/storytel-reading-log/releases/latest/download/storytel-reading-log.apk)** · **[Download APK ZIP](https://github.com/rthorman/storytel-reading-log/releases/latest/download/storytel-reading-log.zip)** · [All releases](https://github.com/rthorman/storytel-reading-log/releases)
 
-Install the app, choose **Set up automatic listening log**, and enable its notification access in Android settings. Start playback in Storytel. Only `grit.storytel.app` and `com.storytel.app` notifications are processed. Media metadata is preferred, falling back to notification title/text. A playing media session is required when its state is available; otherwise an ongoing notification is accepted. Active notifications are inspected when the listener connects. The setup dialog shows the last detected book.
+</div>
 
-Repeated notifications for the same title and author do not create duplicate books. The first observed date becomes its start date. Already-finished books are not automatically restarted. Correct metadata manually when notification text contains a narrator or chapter rather than book details. A different title or author may create a separate entry. Detection cannot recover activity before access was enabled. Dates are local calendar dates; comments use UTC.
+## Install and start logging on your Android phone
 
-Series membership, ebook reading, whole-book completion and re-reading sessions cannot be reliably derived from playback notifications in this version. Enter those details manually. Notification removal, playback pauses and chapter endings never mark a book finished. No Storytel API or account credentials are used. Device testing with the installed Storytel version is required to verify its metadata format and package ID. Battery restrictions or revoked notification access can interrupt capture.
+1. **Download the APK above on your phone.** If you choose the ZIP, extract it in Files first.
+2. **Tap the APK to install.** If prompted, open Settings and allow your browser or Files app to **install unknown apps**, then return to install. You can disable that installation permission afterward.
+3. **Open Storytel Reading Log → Settings → Open notification access.** Enable **Storytel reading log automation**. If Android blocks access, open Android **Settings → Apps → Storytel Reading Log → ⋮ → Allow restricted settings**, then try notification access again. Some phones omit this step.
+4. **Allow background operation.** In Android **Settings → Apps → Storytel Reading Log → Battery**, choose **Unrestricted** or allow background usage where available. Allow **Storytel notifications** too.
+5. **Play an audiobook in Storytel.** Check that its playback notification appears, then return to the journal’s **Library**. The book and its first detected listening date should appear. Review the title and author.
 
-## Diagnostic export
+**Requires Android 8.0 or newer. This is an early, sideloaded prototype.** Series, ebook activity and finish dates currently need manual entry. Before changing phones or uninstalling, use **Settings → Export reading data** to save a CSV backup. Read the [installation and troubleshooting guide](docs/INSTALL.md) if Android rejects an update.
 
-Use **Export debug log** on the home screen to save a JSON Lines file through Android's document picker. It includes Storytel notification extras (text/scalars and type names for complex objects), media title/author/artist/album, playback state and position, capture/skip decisions, database record IDs, lifecycle events and error stack traces. Each record has a UTC timestamp. Only the two recognized Storytel packages are logged. Tokens, images and intents are not serialized. Two private rotating files retain approximately 2 MiB in total; old events are discarded. **Set up automatic listening log → Clear debug log** deletes this diagnostic history without deleting books.
+## A quieter place for your reading life
 
-The export contains personal reading metadata. Review it before sharing. To investigate a problem, clear the log, reproduce it in Storytel, then export it and include what you expected, the approximate time and your Storytel version. A debug log is not a backup of the reading database.
+<p align="center">
+  <img src="app/src/main/res/drawable-nodpi/library_engraving.png" width="640" alt="Generated Victorian engraving of a quiet library, an open book and a reading chair, in bottle green and ivory" />
+</p>
 
-## Build instructions
+Ivory paper, bottle-green accents, antique-brass details and serif typography give the journal the feel of a personal library. The illustration was generated for this project. Decorative bookplates use initials rather than pretending to be real book-cover artwork.
 
-Open this directory in Android Studio with JDK 17 and install Android SDK 35. Use an installed Gradle 8.9 to build, or generate the wrapper with `gradle wrapper --gradle-version 8.9` first. This initial source does not include a downloaded wrapper binary.
+| Library | Book details | Settings |
+| --- | --- | --- |
+| ![Library](docs/screenshots/library.png) | ![Book details](docs/screenshots/book-details.png) | ![Settings](docs/screenshots/settings.png) |
+
+Screenshots use demonstration books; no personal reading history is included.
+
+## What it does
+
+- **Automatic listening capture:** records a book and its first observed listening date from Storytel’s Android playback notification.
+- **A searchable library:** find books by title, author or series; sort by those fields or by start date; filter by reading status.
+- **Books and series:** edit metadata and dates, group books into series, and keep separate comments on each.
+- **CSV backup and restore:** move books, series, dates and comments between phones in one readable file, with validation before restoring.
+- **Useful diagnostics:** export timestamped notification fields, playback metadata, capture decisions and errors.
+- **Local storage:** SQLite on your phone, with no account, analytics, server or Internet permission.
+
+## Back up or move to another phone
+
+On the old phone, choose **Settings → Export reading data** and save the CSV somewhere outside the app. Transfer it using Quick Share, USB or your preferred file service. On the new phone, install the app and choose **Settings → Import reading data**. Select the CSV, review the record counts and confirm the restore.
+
+**Restore replaces the receiving phone’s existing books, series and comments. Export those first if you want to keep them.** The entire file is validated before changes are offered, and restore runs in one database transaction. It does not merge two libraries. [CSV format and backup guide](docs/BACKUPS.md).
+
+## How automation works—and its limits
+
+With notification access enabled, the listener processes only `grit.storytel.app` and `com.storytel.app` notifications. It prefers media metadata and falls back to notification title/text. A reported media session must be playing; without session metadata, an ongoing notification is accepted. Active notifications are checked when the listener connects.
+
+Repeated notifications for the same title and author are matched to the existing book. Its first observed date becomes the start date. **A paused player, removed notification or chapter ending never marks a book finished.** Android notification access is broad, but other apps’ notifications are ignored by this app.
+
+Storytel may expose chapter names or narrators instead of book details. Different metadata can create a separate entry; titles and authors remain editable. Capture cannot recover earlier activity, derive series reliably, detect ebook reading or establish whole-book completion reliably. Re-reading sessions are not tracked separately yet. Notification access, battery restrictions and your Storytel version affect capture.
+
+## When something goes wrong
+
+Enable **Settings → Debug mode**, reproduce the issue, then choose **Export debug log**. Debug mode is off by default. For a clean trace, use **Clear debug history** before reproducing it. [Diagnostics and privacy](docs/DIAGNOSTICS.md) explains the contents and useful reporting details.
+
+**Logs and CSV backups contain personal reading details. Review them before attaching them to a public issue.** Nothing uploads automatically. Android cloud backup is disabled; save CSV backups yourself. A debug export is not a database backup.
+
+## Build from source
+
+Use **JDK 17**, **Gradle 8.9**, and **Android SDK 35**. Open this directory in Android Studio, or run:
 
 ```sh
 bash scripts/test.sh
-gradle lint assembleDebug
-adb install app/build/outputs/apk/debug/app-debug.apk
+gradle testDebugUnitTest lint assembleRelease
+adb install -r app/build/outputs/apk/release/app-release.apk
 ```
 
-GitHub Actions installs the toolchain, runs validation and lint, builds the app, and uploads a debug APK artifact. Debug APKs are for development.
+This source does not include a downloaded Gradle wrapper binary. Generate one with `gradle wrapper --gradle-version 8.9` if desired. Production code uses native Android APIs and Java; Robolectric and JUnit verify UI and storage behavior. GitHub Actions runs checks and uploads the APK and UI captures. [Verification notes](VERIFICATION.md) describe the practical limits of testing.
 
-## Private repository
+## Releases and project status
 
-This project must remain private. To create and push from an authenticated GitHub CLI:
+Downloadable APK and ZIP files are attached to [GitHub Releases](https://github.com/rthorman/storytel-reading-log/releases). Development builds are also available as short-lived [Actions artifacts](https://github.com/rthorman/storytel-reading-log/actions/workflows/android.yml). This project is public; personal reading history and debug logs are not part of the repository.
 
-```sh
-gh repo create storytel-reading-log --private --source=. --remote=origin --push
-```
+This is an independent prototype, not affiliated with or endorsed by Storytel. Real-device testing with Storytel remains essential. Improvements and reproducible bug reports are welcome through [Issues](https://github.com/rthorman/storytel-reading-log/issues).
 
-No books or personal reading history are checked into Git. Uninstalling the app removes its local history; export/restore is not implemented yet.
+## License
 
-## Device acceptance checks
-
-1. Enable notification access and play a Storytel book; confirm a book and today's start date appear.
-2. Pause/resume and change chapters; check that no duplicate or false completion appears. Inspect the title and author against Storytel.
-3. Reopen the app and restart the device; verify persistence and continued capture.
-4. Edit dates and series, add comments to both, search and sort, then restart the app and verify changes.
-5. Disable notification access and confirm logging stops. Other apps' notifications must never create books.
-
-The core date rules can be tested without the Android SDK. Full Android compilation and device acceptance are separate checks.
+Copyright © 2026 Rickard Thorman. Licensed under the **GNU Affero General Public License, version 3 or later** (`AGPL-3.0-or-later`). See [LICENSE](LICENSE). The license applies to the project’s source and project-authored materials; third-party dependencies retain their own licenses. The library illustration was generated using OpenAI image generation; see [art credits](docs/ART.md).

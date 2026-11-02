@@ -20,8 +20,16 @@ jobs:
         with:
           gradle-version: '8.9'
       - run: bash scripts/test.sh
-      - run: gradle --no-daemon lint assembleDebug
+      - run: gradle --no-daemon testDebugUnitTest lint assembleRelease
       - uses: actions/upload-artifact@v4
         with:
-          name: reading-log-debug
-          path: app/build/outputs/apk/debug/*.apk
+          name: reading-log-android
+          path: app/build/outputs/apk/release/*.apk
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ui-verification
+          path: |
+            app/build/ui-screenshots/*.png
+            app/build/reports/tests/testDebugUnitTest/
+            app/build/reports/lint-results-*.html

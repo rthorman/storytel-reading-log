@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 package com.readinglog.storytel;
 
 import android.content.Context;
@@ -9,8 +10,23 @@ import java.time.Instant;
 
 /** Two rotating private files, at most about 2 MiB total. Contains Storytel reading metadata. */
 final class DebugLog {
+    static boolean enabled(Context context) {return context.getSharedPreferences("diagnostics",Context.MODE_PRIVATE).getBoolean("enabled",false);}
+    static void setEnabled(Context context,boolean enabled) {
+        if(enabled) {
+            context.getSharedPreferences("diagnostics",Context.MODE_PRIVATE).edit().putBoolean("enabled",true).apply();
+            event(context,"debug_mode_enabled",data());
+        } else {
+            event(context,"debug_mode_disabled",data());
+            context.getSharedPreferences("diagnostics",Context.MODE_PRIVATE).edit().putBoolean("enabled",false).apply();
+        }
+    }
+    static String version(Context context) {
+        try {return context.getPackageManager().getPackageInfo(context.getPackageName(),0).versionName;}
+        catch(Exception ignored) {return "unknown";}
+    }
     private static final long LIMIT=1024*1024;
     static synchronized void event(Context context,String event,JSONObject details) {
+        if(!enabled(context)) return;
         try {
             File file=new File(context.getFilesDir(),"storytel-debug.jsonl");
             if(file.length()>LIMIT) {
@@ -41,7 +57,7 @@ final class DebugLog {
         return o;
     }
     static synchronized void export(Context context,OutputStream out) throws IOException {
-        out.write((data("event","export_header","exported_at",Instant.now(),"app_version","0.1.0","android_api",android.os.Build.VERSION.SDK_INT,"device",android.os.Build.MANUFACTURER+" "+android.os.Build.MODEL)+"\n").getBytes(StandardCharsets.UTF_8));
+        out.write((data("event","export_header","exported_at",Instant.now(),"app_version",version(context),"android_api",android.os.Build.VERSION.SDK_INT,"device",android.os.Build.MANUFACTURER+" "+android.os.Build.MODEL)+"\n").getBytes(StandardCharsets.UTF_8));
         for(String name:new String[]{"storytel-debug.previous.jsonl","storytel-debug.jsonl"}) {
             File f=new File(context.getFilesDir(),name);
             if(f.exists()) try(InputStream in=new FileInputStream(f)) { byte[] buffer=new byte[8192]; int n; while((n=in.read(buffer))!=-1) out.write(buffer,0,n); }
